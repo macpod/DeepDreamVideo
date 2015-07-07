@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 __author__ = 'graphific'
 
 import argparse
@@ -14,7 +14,7 @@ sys.path.append('../caffe/distribute/python')
 import caffe
 
 # Load DNN
-model_path = 'caffe/models/bvlc_googlenet/'  # substitute your path here
+model_path = '../caffe/models/bvlc_googlenet/'  # substitute your path here
 net_fn = model_path + 'deploy.prototxt'
 param_fn = model_path + 'bvlc_googlenet.caffemodel'
 
@@ -95,9 +95,9 @@ def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4, end='incep
 # own functions
 
 
-def morphPicture(filename1, filename2):
+def morphPicture(filename1, img2):
     img1 = PIL.Image.open(filename1)
-    img2 = PIL.Image.open(filename2)
+    img2 = PIL.Image.fromarray(np.uint8(img2))
     return PIL.Image.blend(img1, img2, 0.5)
 
 layersloop = ['inception_4c/output', 'inception_4d/output',
@@ -124,14 +124,14 @@ def main(input, output):
     make_sure_path_exists(output)
 
     frame = np.float32(PIL.Image.open(input + '/0001.jpg'))
-    frame_i = 0
-    for i in range(frame_i, 2980):
+    frame_i = 1
+    for i in range(frame_i, 2149):
         frame = deepdream(
             net, frame, end=layersloop[frame_i % len(layersloop)], iter_n=5)
         saveframe = input + "/%04d.jpg" % frame_i
-        PIL.Image.fromarray(np.uint8(frame)).save(saveframe)
         newframe = output + "/%04d.jpg" % frame_i
-        frame = morphPicture(saveframe, newframe)
+        frame = morphPicture(saveframe, frame)
+        frame.save(newframe)
         frame = np.float32(frame)
         frame_i += 1
 
