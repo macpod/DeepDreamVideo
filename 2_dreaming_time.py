@@ -10,11 +10,11 @@ import numpy as np
 import scipy.ndimage as nd
 import PIL.Image
 import sys
-sys.path.append('../caffe/distribute/python')
+sys.path.append('../../caffe2/distribute/python')
 import caffe
 
 # Load DNN
-model_path = '../caffe/models/bvlc_googlenet/'  # substitute your path here
+model_path = '../../caffe2/models/bvlc_googlenet/'  # substitute your path here
 net_fn = model_path + 'deploy.prototxt'
 param_fn = model_path + 'bvlc_googlenet.caffemodel'
 
@@ -119,9 +119,13 @@ def make_sure_path_exists(path):
             raise
 
 
-def main(input, output):
+def main(input, output, gpu):
     make_sure_path_exists(input)
     make_sure_path_exists(output)
+
+    if gpu:
+        caffe.set_mode_gpu();
+        caffe.set_device(0);
 
     frame = np.float32(PIL.Image.open(input + '/0001.jpg'))
     frame_i = 1
@@ -142,6 +146,8 @@ if __name__ == "__main__":
         '-i', '--input', help='Input directory where extracted frames are stored', required=True)
     parser.add_argument(
         '-o', '--output', help='Output directory where processed frames are to be stored', required=True)
+    parser.add_argument(
+        '-g', '--gpu', help='Use GPU', action='store_true', dest='gpu')
     args = parser.parse_args()
 
-    main(args.input, args.output)
+    main(args.input, args.output, args.gpu)
